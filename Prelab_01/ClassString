@@ -1,0 +1,21 @@
+// Implement the function cutString(string s, int index) to print the substring of string s from index position to the end (index from 0).
+// Hint:  Use the string::substr function in the <string> library.
+
+void cutString(string s, int index){
+    std::cout << s.substr(index) << std::endl;
+}
+
+// Implement findAllIndex(string s1, string s2) to print all positions of the first character of string s2 in string s1. If not found, print -1. The found positions will be separated by a space, after the last position, do not print any more characters (including spaces, carriage returns)
+// Hint:  Use the string::find function in the <string> library.
+
+void findAllIndex(string s1, string s2){
+        std::size_t pos = s1.find(s2[0]);
+    while (pos != std::string::npos) {
+        std::cout << pos << " ";
+        pos = s1.find(s2[0], pos + 1);
+    }
+    if (pos == std::string::npos) {
+        std::cout << -1 << std::endl;
+    }
+}
+
