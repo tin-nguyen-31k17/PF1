@@ -27,9 +27,12 @@ public:
     int maidenkiss;
     int phoenixdown;
     int rescue;
+    int O_HP;
+    int tiny;
+    int frog;
 
     Knight(int hp, int lvl, int rmdy, int mdk, int pdown) :
-        HP(hp), level(lvl), remedy(rmdy), maidenkiss(mdk), phoenixdown(pdown), rescue(-1) {}
+        HP(hp), level(lvl), remedy(rmdy), maidenkiss(mdk), phoenixdown(pdown), rescue(-1), tiny(-1), frog(-1) {}
 
     void display() {
         cout << "HP=" << HP
@@ -41,7 +44,9 @@ public:
     }
 };
 
-void processEvent(int event_code, Knight& Knight);
+bool isInputValid(int hp, int level, int remedy, int maidenkiss, int phoenixdown);
+void processEvent(int event_code, Knight& Knight, int i);
+void handleOpponent(string opponentName, double baseDamage, Knight& Knight, int i);
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue);
 
 #endif // __KNIGHT_H__
