@@ -30,9 +30,10 @@ public:
     int O_HP;
     int tiny;
     int frog;
+    int O_LV;
 
     Knight(int hp, int lvl, int rmdy, int mdk, int pdown) :
-        HP(hp), level(lvl), remedy(rmdy), maidenkiss(mdk), phoenixdown(pdown), rescue(-1), tiny(-1), frog(-1) {}
+        HP(hp), level(lvl), remedy(rmdy), maidenkiss(mdk), phoenixdown(pdown), rescue(-1), tiny(-1), frog(-1), O_HP(HP) {}
 
     void display() {
         cout << "HP=" << HP

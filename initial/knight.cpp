@@ -11,18 +11,14 @@ bool isInputValid(int hp, int level, int remedy, int maidenkiss, int phoenixdown
 void handleOpponent(string opponentName, double baseDamage, Knight& Knight, int i) {
     int b = i % 10;
     int levelO = Knight.level > 6 ? (b > 5 ? b : 5) : b;
-
-    cout << "Knight's level: " << Knight.level << endl;
-    cout << opponentName << "s: " << levelO << endl;
     
-    if (Knight.level > levelO) 
+    if (Knight.level > levelO || Knight.O_HP == 999) 
     {
-        cout << "Knight wins!" << endl;
         if (Knight.level < 10) {
-            if (opponentName == "Shaman" && Knight.level < 9) Knight.level += 2;
-            ++Knight.level;
+            if ((opponentName == "Shaman" ||opponentName == "Siren Vajish")  && Knight.level < 9) Knight.level += 2;
+            else if (Knight.level == 9) ++Knight.level;
             if (Knight.tiny > 0) Knight.tiny--;
-            cout << "Knight's level increased to " << Knight.level << endl;
+            if (Knight.frog > 0) Knight.frog--;
         }
     }
 
@@ -30,6 +26,7 @@ void handleOpponent(string opponentName, double baseDamage, Knight& Knight, int 
     {
         cout << "Draw!" << endl;
         if (Knight.tiny > 0) Knight.tiny--;
+        if (Knight.frog > 0) Knight.frog--;
     }
 
     else 
@@ -37,19 +34,17 @@ void handleOpponent(string opponentName, double baseDamage, Knight& Knight, int 
         cout << "Opponent wins!" << endl;
 
         if (Knight.tiny > 0) Knight.tiny--;
+        if (Knight.frog > 0) Knight.frog--;
 
         if (opponentName != "Shaman")
         {
             int damage = baseDamage * levelO * 10;
             Knight.HP -= damage;
-            cout << "Knight's HP reduced by " << damage << " to " << Knight.HP << endl;
         }
         if (opponentName == "Shaman") 
         {
         // Combat with Shaman
-            cout << "Knight is turned into a tiny!" << endl;
             if (Knight.remedy > 0) {
-                cout << "Knight uses Remedy to return to normal state." << endl;
                 --Knight.remedy;
             } else {
                 // Knight is in tiny state for the next 3 events
@@ -65,29 +60,21 @@ void handleOpponent(string opponentName, double baseDamage, Knight& Knight, int 
         if (opponentName == "Siren Vajsh") 
         {
         // Combat with Siren Vajsh
-            cout << "Knight is turned into a frog!" << endl;
             if (Knight.maidenkiss > 0) {
-                cout << "Knight uses Maidenkiss to return to normal state." << endl;
                 --Knight.maidenkiss;
             } else {
-                // Knight is in tiny state for the next 3 events
-                Knight.tiny = 3;
-                if (Knight.HP < 5) {
-                    Knight.HP = 1;
-                } else {
-                    Knight.HP = Knight.HP / 5;
-                }
+                // Knight is in frog state for the next 3 events
+                Knight.frog = 3;
+                Knight.O_LV = Knight.level;
             }
         }
         
         if (Knight.HP <= 0) 
         {
             if (Knight.phoenixdown > 0) {
-                cout << "Knight uses PhoenixDown to restore HP to" << Knight.O_HP << endl;
                 Knight.HP = Knight.O_HP;
                 --Knight.phoenixdown;
             } else {
-                cout << "Knight is defeated! Game over." << endl;
             }
         }
     }
@@ -117,29 +104,59 @@ void processEvent(int event_code, Knight& Knight, int i) {
             handleOpponent("Shaman", 0, Knight, i);
             break;
         case 7: // Meet Siren Vajsh
-            if(Knight.level >= 9) {
-                Knight.HP += 50;
-            } else {
-                Knight.HP -= 70;
-            }
+            handleOpponent("Siren Vajsh", 0, Knight, i);
             break;
         case 11: // Pick up the power-up mushroom MushMario
-            Knight.level += 1;
+            {
+                int n1 = ((Knight.level + Knight.phoenixdown) % 5 + 1) * 3;
+                int s1 = 0;
+                for (int i = 99; i > 0; i -= 2) {
+                    if (n1 > 0) {
+                        s1 += i;
+                        n1--;
+                    } else break;
+                }
+                Knight.HP += s1 % 100;
+                int new_HP = Knight.HP;
+                bool is_prime = false;
+                while (!is_prime) {
+                    new_HP++;
+                    is_prime = true;
+                    for (int j = 2; j <= sqrt(new_HP); j++) {
+                        if (new_HP % j == 0) {
+                            is_prime = false;
+                            break;
+                        }
+                    }
+                }
+                if (new_HP > Knight.O_HP) {
+                    new_HP = Knight.O_HP;
+                }
+                Knight.HP = new_HP;
+            }
             break;
         case 12: // Pick up the Fibonacci mushroom MushFib
-            Knight.level += 2;
+            if (Knight.HP > 1) {
+                int fib1 = 1, fib2 = 1, temp;
+                while (fib2 <= Knight.HP) {
+                    temp = fib2;
+                    fib2 += fib1;
+                    fib1 = temp;
+                }
+                Knight.HP = fib2 - Knight.HP < Knight.HP - fib1 ? fib2 : fib1;
+            }
             break;
         case 13: // Pick up the ghost mushroom MushGhost
             Knight.maidenkiss += 1;
             break;
         case 15: // Obtain recovery potion Remedy
-            Knight.remedy += 1;
+            if(Knight.remedy < 99) Knight.remedy++;
             break;
         case 16: // Obtain the antidote MaidenKiss
-            Knight.maidenkiss += 1;
+            if(Knight.maidenkiss < 99) Knight.maidenkiss++;
             break;
         case 17: // Pick up the phoenix tear PhoenixDown
-            Knight.phoenixdown += 1;
+            if(Knight.phoenixdown < 99) Knight.phoenixdown++;
             break;
         case 18: // Meet Merlin
             Knight.level += 3;
@@ -187,8 +204,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         exit(EXIT_FAILURE);
     }
 
-    knight.O_HP = HP;
-
     // read second line
     if (!getline(fin, line)) {
         cerr << "Error reading second line from input file" << endl;
@@ -206,6 +221,8 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         processEvent(arr[i], knight, i+1);
     }
     if (knight.tiny == 0) knight.HP = knight.HP * 5;
+
+    if (knight.frog == 0) knight.level = knight.O_LV;
 
     if (knight.HP > 0 && knight.rescue == -1) knight.rescue = 1;
 
