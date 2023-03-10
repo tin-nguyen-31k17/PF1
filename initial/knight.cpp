@@ -24,15 +24,12 @@ void handleOpponent(string opponentName, double baseDamage, Knight& Knight, int 
 
     else if (Knight.level == levelO) 
     {
-        cout << "Draw!" << endl;
         if (Knight.tiny > 0) Knight.tiny--;
         if (Knight.frog > 0) Knight.frog--;
     }
 
     else 
     {
-        cout << "Opponent wins!" << endl;
-
         if (Knight.tiny > 0) Knight.tiny--;
         if (Knight.frog > 0) Knight.frog--;
 
@@ -75,13 +72,42 @@ void handleOpponent(string opponentName, double baseDamage, Knight& Knight, int 
                 Knight.HP = Knight.O_HP;
                 --Knight.phoenixdown;
             } else {
+                Knight.rescue = 0;
+                exit;
             }
         }
     }
 }
 
 void processEvent(int event_code, Knight& Knight, int i) {
-    switch(event_code) {
+    string checkMush = to_string(event_code);
+    if (checkMush.substr(0, checkMush.length()) == "13")
+    {
+        for (int i = 2, i < checkMush.length())
+        {
+            switch(checkMush[i]) {
+            case 1:
+                handleMushroom1();
+                break;
+            case 2:
+                handleMushroom2();
+                break;
+            case 3:
+                handleMushroom3();
+                break;
+            case 4:
+                handleMushroom4();
+                break;
+            // add cases for any other mushroom types
+            default:
+                // handle invalid mushroom type
+                break;
+            }
+        }
+    }
+    else
+    {
+        switch(event_code) {
         case 0: // Bowser surrendered and handed over the princess
             Knight.rescue = 1;
             break;
@@ -146,9 +172,6 @@ void processEvent(int event_code, Knight& Knight, int i) {
                 Knight.HP = fib2 - Knight.HP < Knight.HP - fib1 ? fib2 : fib1;
             }
             break;
-        case 13: // Pick up the ghost mushroom MushGhost
-            Knight.maidenkiss += 1;
-            break;
         case 15: // Obtain recovery potion Remedy
             if(Knight.remedy < 99) Knight.remedy++;
             break;
@@ -174,6 +197,7 @@ void processEvent(int event_code, Knight& Knight, int i) {
         default:
             cerr << "Error: Unknown event code " << event_code << endl;
             break;
+        }
     }
 }
 
@@ -219,15 +243,15 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
     for (int i = 0; i < k && knight.HP > 0 && knight.rescue == -1; i++) {
         processEvent(arr[i], knight, i+1);
+        if (knight.tiny == 0) knight.HP = knight.HP * 5;
+        if (knight.frog == 0) knight.level = knight.O_LV;
+        if (i == k-1)
+        {
+            if (knight.HP > 0 && knight.rescue == -1) knight.rescue = 1;
+            else if (knight.HP <= 0 && knight.rescue == -1)  knight.rescue = 0;
+        }
+        knight.display();
     }
-    if (knight.tiny == 0) knight.HP = knight.HP * 5;
-
-    if (knight.frog == 0) knight.level = knight.O_LV;
-
-    if (knight.HP > 0 && knight.rescue == -1) knight.rescue = 1;
-
-    else if (knight.HP <= 0 && knight.rescue == -1)  knight.rescue = 0;
-
     // read third line
     if (!getline(fin, line)) {
         cerr << "Error reading third line from input file" << endl;
@@ -241,5 +265,4 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     getline(ss, file_merlin_pack);
 
     fin.close();
-    knight.display();
 }
