@@ -1,6 +1,7 @@
 #ifndef __KNIGHT_H__
 #define __KNIGHT_H__
 
+const int MAX = 9999;
 
 const int MIN_HP = 1;
 const int MAX_HP = 999;
@@ -31,9 +32,13 @@ public:
     int tiny;
     int frog;
     int O_LV;
+    int Merlin;
+    int Asclep;
+    int King;
+    int Lancelot;
 
     Knight(int hp, int lvl, int rmdy, int mdk, int pdown) :
-        HP(hp), level(lvl), remedy(rmdy), maidenkiss(mdk), phoenixdown(pdown), rescue(-1), tiny(-1), frog(-1), O_HP(HP) {}
+        HP(hp), level(lvl), remedy(rmdy), maidenkiss(mdk), phoenixdown(pdown), rescue(-1), tiny(-1), frog(-1), O_HP(HP), Merlin(0), Asclep(0), King(0), Lancelot(0) {}
 
     void display() {
         cout << "HP=" << HP
@@ -46,7 +51,10 @@ public:
 };
 
 bool isInputValid(int hp, int level, int remedy, int maidenkiss, int phoenixdown);
-void processEvent(int event_code, Knight& Knight, int i);
+bool isMountain(int arr[], int n);
+bool isPrime(int n);
+void handleHP(Knight& Knight);
+void processEvent(int event_code, Knight& Knight, int i, string file);
 void handleOpponent(string opponentName, double baseDamage, Knight& Knight, int i);
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue);
 
